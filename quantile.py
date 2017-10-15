@@ -4,17 +4,25 @@
 
 def Time_and_Rain(infolist, time, *specific_month):
     rain = {}
-    
+
     if time == 'daily':
         for i in range(1, len(infolist) - 1):
-            a = infolist[i][6]
+            a = infolist[i][5]
+            b = infolist[i][6]
             if a == '':
                 continue
-            elif int(a) == 1:
-                key = tuple(infolist[i][2:5])
-                curRain = float(infolist[i][5])
-                rain[key] = rain.get(key,0) + curRain
+            else:
+                if b == '':
+                    key = tuple(infolist[i][2:5])
+                    curRain = float(infolist[i][5])
+                    rain[key] = rain.get(key, 0) + curRain
+                elif int(b) == 1:
+                    key = tuple(infolist[i][2:5])
+                    curRain = float(infolist[i][5])
+                    rain[key] = rain.get(key, 0) + curRain
+
         return rain
+
     if time == 'monthly':
         months = []
         rains = []
@@ -33,12 +41,12 @@ def Time_and_Rain(infolist, time, *specific_month):
                         continue
                     else:
                         rainamount += float(k)
-            rains.append(round(rainamount,2))
+            rains.append(round(rainamount, 2))
 
         for i in range(len(months)):
             key = tuple(months[i])
             curRain = rains[i]
-            rain[key] = rain.get(key,0) + curRain
+            rain[key] = rain.get(key, 0) + curRain
 
         return rain
     if time == 'yearly':
@@ -60,19 +68,24 @@ def Time_and_Rain(infolist, time, *specific_month):
                             continue
                         else:
                             rainamount += float(k)
-            rains.append(round(rainamount,2))
+            rains.append(round(rainamount, 2))
 
         for i in range(len(years)):
             key = years[i]
             curRain = rains[i]
-            rain[key] = rain.get(key,0) + curRain
+            rain[key] = rain.get(key, 0) + curRain
 
         return rain
     if time == 'month+year':
         specific_month = specific_month[0]
+        # year-data
         years = []
         for i in range(1, len(infolist) - 1):
-            if infolist[i][2] != '':
+            a = infolist[i][5]
+            b = infolist[i][6]
+            if a == '' and b == '':
+                continue
+            else:
                 y = infolist[i][2]
                 if y not in years:
                     years.append(y)
@@ -88,7 +101,7 @@ def Time_and_Rain(infolist, time, *specific_month):
                             continue
                         else:
                             rainamount += float(k)
-            rains.append(round(rainamount,2))
+            rains.append(round(rainamount, 2))
 
         for i in range(len(years)):
             key = years[i]
@@ -96,17 +109,19 @@ def Time_and_Rain(infolist, time, *specific_month):
             rain[key] = rain.get(key, 0) + curRain
         return rain
 
+
 def getThresholdVal_b(time_series, frequency, rain, threshold_type):
     N_total = len(time_series)
-    threshold = round(N_total/frequency)
+    threshold = round(N_total / frequency)
     dup_rain = rain[:]
     dup_rain.sort()
     # Case. high
     if threshold_type == 'high':
-        return dup_rain[len(rain)-threshold]
+        return dup_rain[len(rain) - threshold]
     # Case. low
     else:
-        return dup_rain[threshold-1]
+        return dup_rain[threshold - 1]
+
 
 def getResult_b(data, rain, thres, type):
     result = []
@@ -125,6 +140,7 @@ def getResult_b(data, rain, thres, type):
                 result.append(data[i])
 
     return result
+
 
 def getThresholdVal_a(data, rain, freq, type):
     thres_vals = []
@@ -147,15 +163,21 @@ def getThresholdVal_a(data, rain, freq, type):
             diff = []
             for j in range(0, len(data)):
                 if rain[i] >= rain[j]:
-                    diff.append(j-tmp)
+                    diff.append(j - tmp)
                     tmp = j
             if min(diff) >= freq:
                 thres_vals.append(rain[i])
-        thres_val_a = max(thres_vals)
-        return thres_val_a
+        if thres_vals != []:
+            thres_val_a = max(thres_vals)
+            return thres_val_a
+        else:
+            return 'None'
+
 
 def getResult_a(data, rain, thres, type):
     result = []
+    if thres == 'None':
+        return ['None']
     if type == 'high':
         for index in range(len(rain)):
             if rain[index] >= thres:
@@ -276,9 +298,13 @@ graphYorN = input("Do you want to see the graph? (Y/N)\n")
 # Output
 #
 # Method A.
-print("Method A : Threshold value is: ", thres_val_a, "and Corresponding values are", result_a)
+print("[Method A]:\nThreshold value =", thres_val_a, "\nCorresponding values are")
+for i in result_a:
+    print(i)
 # Method B. threshold val # corresponding time values
-print("Method B : Threshold value is: ", thres_val_b, "and Corresponding values are ", result_b)
+print("[Method B]\nThreshold value =", thres_val_b, "\nCorresponding values are ")
+for i in result_b:
+    print(i)
 
 
 if graphYorN == 'Y':
