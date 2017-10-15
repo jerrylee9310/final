@@ -145,33 +145,50 @@ def getResult_b(data, rain, thres, type):
 def getThresholdVal_a(data, rain, freq, type):
     thres_vals = []
     if type == 'high':
-        for i in range(0, len(data)):
+        for i in range(0, len(rain)):
             tmp = 0
             diff = []
-            for j in range(0, len(data)):
+            for j in range(0, len(rain)):
                 if rain[i] <= rain[j]:
-                    diff.append(j - tmp)
                     tmp = j
-            if min(diff) >= freq:
+                    break
+            for k in range(tmp+1, len(rain)):
+                if rain[i] <= rain[k]:
+                    if k-tmp >= freq:
+                        diff.append(k - tmp)
+                        tmp = k
+                    else:
+                        break
+            if diff != []:
                 thres_vals.append(rain[i])
-        thres_val_a = min(thres_vals)
-        return thres_val_a
+        if thres_vals == []:
+            return 'None'
+        else:
+            thres_val_a = min(thres_vals)
+            return thres_val_a
 
     else:
-        for i in range(0, len(data)):
+        for i in range(0, len(rain)):
             tmp = 0
             diff = []
-            for j in range(0, len(data)):
+            for j in range(0, len(rain)):
                 if rain[i] >= rain[j]:
-                    diff.append(j - tmp)
                     tmp = j
-            if min(diff) >= freq:
+                    break
+            for k in range(tmp+1, len(rain)):
+                if rain[i] >= rain[k]:
+                    if k-tmp >= freq:
+                        diff.append(k-tmp)
+                        tmp = k
+                    else:
+                        break
+            if diff != []:
                 thres_vals.append(rain[i])
-        if thres_vals != []:
+        if thres_vals == []:
+            return 'None'
+        else:
             thres_val_a = max(thres_vals)
             return thres_val_a
-        else:
-            return 'None'
 
 
 def getResult_a(data, rain, thres, type):
